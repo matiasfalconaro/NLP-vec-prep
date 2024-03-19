@@ -5,27 +5,33 @@ import logging
 import os
 import json
 
+from typing import Any
 from tempfile import TemporaryDirectory
+from logging import Logger
+
 from langchain_community.llms import Ollama
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-from langchain_community.agent_toolkits.file_management.toolkit import FileManagementToolkit
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
 
-# Setup logging
-def setup_logging():
+def setup_logging() -> Logger:
+    """
+    Setup logging configuration and return a logger object.
+    """
     logging.basicConfig(filename='logfile.log', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     return logging.getLogger(__name__)
 
 
-# Function to start monitoring TemporaryDirectory
-def start_monitoring(path):
+def start_monitoring(path: str) -> Any:
+    """
+    Monitor the given path for file system events.
+    """
     event_handler = LoggingEventHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
@@ -33,9 +39,11 @@ def start_monitoring(path):
     return observer
 
 
-# Extract text from PDF
-def extract_text_from_pdf(pdf_path):
-    logger.info("""Starting PDF file extraction.""")
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """
+    Extract text from the PDF file.
+    """
+    logger.info("Starting PDF file extraction.")
     text = ""
     with fitz.open(pdf_path) as doc:
         for page_num in doc:
@@ -45,99 +53,129 @@ def extract_text_from_pdf(pdf_path):
 
 
 class MockDocument:
+    """
+    A mock document class to hold the text and metadata.
+    """
     def __init__(self, text, metadata=None):
         self.page_content = text
         self.metadata = metadata if metadata is not None else {}
 
-            
-# Process text into chunks
-def process_text_into_chunks(text, temp_dir):
+
+def process_text_into_chunks(text: str, temp_dir: str, permanent_dir: str) -> list:
+    """
+    Process the text into chunks and store them in the temporary directory.
+    """
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
     mock_docs = [MockDocument(text)]
-    all_splits = text_splitter.split_documents(mock_docs)
-    logger.info(f"Total text chunks created: {len(all_splits)}")
+    splits = text_splitter.split_documents(mock_docs)
+    logger.info(f"Total text chunks created: {len(splits)}")
     
-    for i, chunk in enumerate(all_splits, start=1):
-        logger.info(f"Processing chunk {i}/{len(all_splits)}")
-        
-    # If the process involves creating or modifying files, add respective logs here.
-    # This part is for demonstration; adjust according to actual usage:
-    for filename in os.listdir(temp_dir):
-        logger.info(f"Modified directory: {temp_dir}, File: {filename}")
-        
-    return all_splits
+    saved_chunk_paths = [] 
+
+    for i, chunk in enumerate(splits, start=1):
+        chunk_filename = f"chunk_{i}.txt"
+        temp_path = os.path.join(temp_dir, chunk_filename)
+        perm_path = os.path.join(permanent_dir, chunk_filename)
+
+        for path in [temp_path, perm_path]:
+            with open(path, 'w') as file:
+                file.write(chunk.page_content)
+            if path == temp_path:
+                saved_chunk_paths.append(temp_path)
+
+        logger.info(f"Processed and saved chunk {i}/{len(splits)}")
+
+    return saved_chunk_paths
 
 
-# Create embeddings and store in vector database
-def create_embeddings_and_store(all_splits, temp_dir):
-    oembed = OllamaEmbeddings(base_url="http://localhost:11434", model="nomic-embed-text")
-    logger.info(f"Initialized OllamaEmbeddings with model: nomic-embed-text at {oembed.base_url}")
-    
-    texts = [doc.page_content for doc in all_splits]
+def create_and_store_embeddings(all_splits: list, temp_dir: str, embed_dir: str, oembed: OllamaEmbeddings):
+    logger.info(f"Initializing nomic-embed-text at {oembed.base_url}")
+
+    texts = []
+    for file_path in all_splits:
+        with open(file_path, 'r') as file:
+            texts.append(file.read())
     logger.info("Starting to create embeddings for document chunks.")
-    
+
     try:
         embeddings = oembed.embed_documents(texts)
         logger.info("Embeddings created successfully.")
-        
+
         for i, embedding in enumerate(embeddings, start=1):
-            embedding_file_path = os.path.join(temp_dir, f"embedding_{i}.json")
-            with open(embedding_file_path, 'w') as f:
-                json.dump(embedding, f)
-            logger.info(f"Saved embedding for chunk {i} to {embedding_file_path}")
+            temp_embedding_file_path = os.path.join(temp_dir, f"embedding_{i}.json")
+            permanent_embedding_file_path = os.path.join(embed_dir, f"embedding_{i}.json")
             
+            for path in [temp_embedding_file_path, permanent_embedding_file_path]:
+                with open(path, 'w') as f:
+                    json.dump(embedding, f)
+                logger.info(f"Saved embedding for chunk {i} to {path}")
+
     except Exception as e:
         logger.error(f"Failed to create embeddings: {e}")
-        
-    vectorstore = Chroma.from_documents(documents=all_splits, embedding=oembed)
+
+
+def read_files_and_store_in_db(all_splits: list, oembed: OllamaEmbeddings, embed_dir: str) -> Chroma:
+    document_objects = []
+    for file_path in all_splits:
+        with open(file_path, 'r') as file:
+            content = file.read()
+            document_objects.append(MockDocument(text=content))
+
+    vectorstore = Chroma.from_documents(documents=document_objects, embedding=oembed)
     logger.info("Completed storing embeddings in vector database.")
     return vectorstore
 
- 
-# Retrieve answer using chain
-def retrieve_answer(vectorstore, question):
+
+def retrieve_answer(vectorstore: Chroma, question: str) -> dict:
+    """
+    Retrieve the answer to the user's question.
+    """
     ollama = Ollama(base_url='http://localhost:11434', model="llama2")
-    qachain = RetrievalQA.from_chain_type(ollama, retriever=vectorstore.as_retriever())
+    qachain = RetrievalQA.from_chain_type(
+        ollama, retriever=vectorstore.as_retriever())
     answer = qachain.invoke({"query": question})
     if 'result' in answer:
         logger.info(f"User query:\n{answer['query']}")
         logger.info(f"Retrieved answer:\n{answer['result']}")
-        print(answer['result'])
+        print(f"Answer: {answer['result']}")
     else:
         logger.error("No 'result' found in the response.")
     return answer
 
 
-# Main function to coordinate the steps
 def main():
+    """
+    Main function to perform the NLP tasks.
+    """
     global logger
-    answer = ""
     logger = setup_logging()
     pdf_path = "documents/Tkinter_expense_manager.pdf"
     text = extract_text_from_pdf(pdf_path)
-    
+
     with TemporaryDirectory() as temp_dir:
+        permanent_dir = "chunks"
+        if not os.path.exists(permanent_dir):
+            os.makedirs(permanent_dir)
+        embed_dir = "embeddings/"
         observer = start_monitoring(temp_dir)
-        logger.info(f"Monitoring started for temporary directory at {temp_dir}")
-        
-        # Pass temp_dir as an argument to process_text_into_chunks
-        all_splits = process_text_into_chunks(text, temp_dir)  # Fixed here
-        
-        vectorstore = create_embeddings_and_store(all_splits, temp_dir)
-        
+        logger.info(f"Monitoring temporary directory at {temp_dir}")
+
+        oembed = OllamaEmbeddings(base_url="http://localhost:11434", model="nomic-embed-text")
+        all_splits = process_text_into_chunks(text, temp_dir, permanent_dir)
+        create_and_store_embeddings(all_splits, temp_dir, embed_dir, oembed)
+        vectorstore = read_files_and_store_in_db(all_splits, oembed, embed_dir)
+
         question = input("Enter your question: ")
-        logger.info(f"Performing similarity search for the question: {question}")
-        
+        logger.info(f"Performing search for the question: {question}")
+
         retrieve_answer(vectorstore, question)
 
         observer.stop()
         observer.join()
         logger.info("Monitoring stopped for temporary directory.")
-        
-        final_temp_dir_contents = os.listdir(temp_dir)
-        logger.info(f"Final contents of the temporary directory before cleanup: {final_temp_dir_contents}")
+
+    logger.info("Temp directory cleanup complete.")
 
 
 if __name__ == "__main__":
     main()
-
