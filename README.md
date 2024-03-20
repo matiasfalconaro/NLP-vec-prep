@@ -128,6 +128,7 @@ Langchain
 - [Langchain Chroma](https://python.langchain.com/docs/integrations/vectorstores/chroma)
 - [Langchain Filesystem](https://python.langchain.com/docs/integrations/tools/filesystem)
 - [Langchain RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html#langchain.chains.retrieval_qa.base.RetrievalQA)
+- [Embeddings Theory] (https://jalammar.github.io/illustrated-word2vec)
 
 Chroma
 - [Chroma GitHub](https://github.com/chroma-core/chroma)

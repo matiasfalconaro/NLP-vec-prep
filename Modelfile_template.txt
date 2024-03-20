@@ -10,3 +10,8 @@ PARAMETER num_ctx xxxx
 
 # Custom system message to guide the model's behavior.
 SYSTEM "<context>"
+
+# Template defining the structure of interaction with the model.
+TEMPLATE """[INST] <<SYS>>{{ .System }}<</SYS>>
+{{ .Prompt }} [/INST]
+"""

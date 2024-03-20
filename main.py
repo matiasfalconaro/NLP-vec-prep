@@ -89,6 +89,9 @@ def process_text_into_chunks(text: str, temp_dir: str, permanent_dir: str) -> li
 
 
 def create_and_store_embeddings(all_splits: list, temp_dir: str, embed_dir: str, oembed: OllamaEmbeddings):
+    """
+    Create embeddings for the document chunks and store them in the embeddings directory.
+    """
     logger.info(f"Initializing nomic-embed-text at {oembed.base_url}")
 
     texts = []
@@ -115,6 +118,9 @@ def create_and_store_embeddings(all_splits: list, temp_dir: str, embed_dir: str,
 
 
 def read_files_and_store_in_db(all_splits: list, oembed: OllamaEmbeddings, embed_dir: str) -> Chroma:
+    """
+    Read the embeddings from the files and store them in the vector database.
+    """
     document_objects = []
     for file_path in all_splits:
         with open(file_path, 'r') as file:
@@ -130,7 +136,8 @@ def retrieve_answer(vectorstore: Chroma, question: str) -> dict:
     """
     Retrieve the answer to the user's question.
     """
-    ollama = Ollama(base_url='http://localhost:11434', model="llama2")
+    ollama = Ollama(base_url='http://localhost:11434', model="<modelname>") # Replace with actual model name
+    logger.info(f"Using model:{ollama.model} at {ollama.base_url}")
     qachain = RetrievalQA.from_chain_type(
         ollama, retriever=vectorstore.as_retriever())
     answer = qachain.invoke({"query": question})
@@ -149,7 +156,7 @@ def main():
     """
     global logger
     logger = setup_logging()
-    pdf_path = "documents/Tkinter_expense_manager.pdf"
+    pdf_path = "<documentname.pdf>"
     text = extract_text_from_pdf(pdf_path)
 
     with TemporaryDirectory() as temp_dir:
