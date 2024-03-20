@@ -1,0 +1,25 @@
+# From https://github.com/ollama/ollama/blob/main/docs/modelfile.md
+# This Modelfile configures <modelname> to act as <desired behaviour> with specific behavior and context.
+
+FROM <modelname>
+
+PARAMETER stop "[INST]"
+PARAMETER stop "[/INST]"
+PARAMETER stop "<<SYS>>"
+PARAMETER stop "<</SYS>>"
+PARAMETER temperature x.x
+PARAMETER num_ctx xxxx
+
+
+SYSTEM "<context>"
+
+TEMPLATE """[INST] <<SYS>>{{ .System }}<</SYS>>
+{{ .Prompt }} [/INST]
+"""
+
+LICENSE """
+<licence description>
+"""
+
+MESSAGE user "<prompt>"
+MESSAGE assistant "<completion>"

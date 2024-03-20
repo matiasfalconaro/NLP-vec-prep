@@ -160,6 +160,8 @@ cython_debug/
 #.idea/
 
 # CUSTOM
+config.json
+
 # Ignore specific sensitive file patterns
 *credentials*     # Ignore all files and directories containing 'credentials'
 credentials/
@@ -175,7 +177,7 @@ keys/
 *chunk*.txt
 *embedding*.json
 *.html
-*Modelfile*.txt
+Modelfile
 *TODO*
 
 # Security and certificate files

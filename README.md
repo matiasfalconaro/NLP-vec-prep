@@ -17,7 +17,7 @@ IMPORTANT: the only commits to the main branch should be changes to the README
 ## Models
 This tool works with 2 instances of the Ollama model locally:
 
-- `llama2` (or other conversational model)
+- `llama2` / `falcon` (or other conversational model)
 - `gnomic-embed-text` (or other open embedding model)
 
 **NOTE: Further tests are needed to determine the best model for the task.**
@@ -27,70 +27,101 @@ Table of models and their features
 | Model Name       | Coding | Embedded | State-of-the-art | Open training datasets | LLM | Natural language | SQL | General use | Code completion | Multimodal | Large context window | Instructions | Conversational | Merged models |
 |------------------|--------|----------|------------------|------------------------|-----|------------------|-----|-------------|-----------------|------------|----------------------|--------------|----------------|---------------|
 | llama2           | x      |          | x                |                        | x   | x                |     | x           |                 |            |                      |              | x              |               |
-| starling-lm      |        |          | x                |                        | x   | x                |     |             |                 |            |                      |              | x              |               |
+| falcon           | x      |          | x                |                        | x   | x                |     | x           |                 |            | x                    | x            | x              |               |
 | gnomic-embed-text|        | x        | x                | x                      |     |                  |     |             |                 |            | x                    |              |                |               |
 
 ## Usage
-1. Place the PDF file to be processed in the documents folder.
-```
-NLP-vec-prep/documents
-```
-3. Dependencies.
+
+### Configuration
+Edit the `config_template.json` and save it as `config.json`.
+
+- PDF Path:
+    - Specifies the path to the PDF file to be processed.
+- Logging:
+    - Enabled: Indicates whether logging is enabled or not. If enabled, logs will be generated.
+    - Log File: Specifies the name of the log file.
+    - Level: Sets the logging level (e.g., INFO, DEBUG, ERROR).
+    - Format: Defines the format of log entries.
+    - Date Format: Specifies the format for timestamps in log entries.
+- Directories:
+    - Chunk Directory: Specifies the directory where chunked data will be stored.
+    - Embed Directory: Specifies the directory where embeddings will be stored.
+    - Use Temp Directory: Indicates whether the tool should use a temporary directory.
+    - Temp Directory: Specifies the path to a custom temporary directory, if enabled.
+- Ollama Embeddings:
+    - Base URL: Specifies the base URL for accessing Ollama embeddings model running in the `ollama` container.
+    - Model: Specifies the specific Ollama embedding model to be used.
+- Monitoring:
+    - Enabled: Indicates whether monitoring is enabled. If enabled, progress or status updates could logged into an `logfile`.
+- Retrieval Model:
+    - Base URL: Specifies the base URL for accessing a retrieval model running in the `ollama` container.
+    - Model: Specifies the specific retrieval model to be used.
+
+**Considerations:**
+The tool is computationally intensive, so users should expect potentially long processing times depending on PDF size and local machine resources.
+Since the tool runs in a temporary directory, logging and monitoring can be enabled to track the process, but users should be aware that log files may become large.
+Sub-process products, like chunked data and embeddings, can be stored in permanent directories to avoid data loss, but users should be aware that these directories may also become large.
+
+### Installation
+1. Create the `documents` directory in `NLP-vec-prep/` and place the PDF file to be processed in the documents folder.
+2. Dependencies.
 ```
 pip install -r requirements.txt
 ```
-5. Pull the base image installation wich is a container for the models.
+3. Pull the base image installation wich is a container for the models.
 ```
 docker pull ollama/ollama
 ```
-7. Run the image and the container.
+4. Run the image and the container.
 ```
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
-9. Run the models.
+5. (optional) Run the models and interact directly via terminal to verify that the conversational/chat model selected is working correctly.  
 ```
-docker exec -it ollama ollama run nomic-embed-text
+docker exec -it ollama ollama run <conversational/chat model name>
 ```
-NOTE: If the message `Error: embedding models do not support chat` appears when pulling th model 'nomic-embed-text', disregard it and continue with the next step.
-```
-docker exec -it ollama ollama run llama2
-```
-11. Run de models.
-```
-docker run ollama
-```
-13. Run the tool.
+6. Run the tool.
 ```
 python main.py
 ```
-15. Once the tool is running the user will be asked to ask a question via the command line.
-16. The tool will then return
-    - `logfile.log` (A log file with the files processing information).
-    - `chunks_<chunk number>.txt` (Text chunks will be satored in `chunks/`).
-    - `embedding_<embedding number>.json` (Embeddings will be satored in `embeddings/`)
-17. The model will return the most similar text to the question asked via the command line.
 
-### Modelfile (Created - Not yet implemented)
+### Modelfile
 The Modelfile is a configuration file that allows you to customize the behavior of the model.
-If you want to create a Modelfile you can edit the Modelfile_template and saveit as Modelfile.
+If you want to create a Modelfile you can edit the `Modelfile_template.txt` and save it as `Modelfile`.
 
-To create a model with a Modelfile you can use the following command:
+(First 4 steps are equal to the previous ones.)
+
+5. Create the directory where the Modelfile will be stored.
 ```
-ollama create choose-a-model-name -f ./Modelfile'
+docker exec ollama mkdir -p /files
 ```
+6. Copy the Modelfile to the container.
 ```
-ollama run llama2
+docker cp ./Modelfile ollama:/files/Modelfile
 ```
+7. Create the model using the modelfile.
+```
+docker exec -it ollama ollama create <modelname> -f /files/Modelfile
+```
+8. List the models to verify that the model was created.
+```
+docker exec -it ollama  ollama list
+```
+9. (optional) Run the models and interact directly via terminal to verify that the conversational/chat model selected is working correctly.  
+```
+docker exec -it ollama ollama run <modelname>
+```
+10. Run the tool.
+```
+python main.py
+```
+## Output
+Once the tool is running the user will be asked to make a question and the tool will return the answer via terminal.
 
 ## Vector Database (VectorStore)
  This tool uses `chromadb`.
+ 
  Chroma is an AI-native open-source embedding database.
-
-### Vector database docker installation (Not yet implemented)
-Pull the base image installation as a container for the vector database.
-```
-docker pull chromadb/chroma
-```
 
 ## Resources:
 Ollama
@@ -109,6 +140,7 @@ Langchain
 - [Langchain Chroma](https://python.langchain.com/docs/integrations/vectorstores/chroma)
 - [Langchain Filesystem](https://python.langchain.com/docs/integrations/tools/filesystem)
 - [Langchain RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html#langchain.chains.retrieval_qa.base.RetrievalQA)
+- [Embeddings Theory](https://jalammar.github.io/illustrated-word2vec)
 
 Chroma
 - [Chroma GitHub](https://github.com/chroma-core/chroma)
