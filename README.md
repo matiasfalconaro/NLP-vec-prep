@@ -31,23 +31,20 @@ Table of models and their features
 | gnomic-embed-text|        | x        | x                | x                      |     |                  |     |             |                 |            | x                    |              |                |               |
 
 ## Usage
-1. Place the PDF file to be processed in the documents folder.
-```
-NLP-vec-prep/documents
-```
-3. Dependencies.
+1. Create the `documents` directory in `NLP-vec-prep/` and place the PDF file to be processed in the documents folder.
+2. Dependencies.
 ```
 pip install -r requirements.txt
 ```
-5. Pull the base image installation wich is a container for the models.
+3. Pull the base image installation wich is a container for the models.
 ```
 docker pull ollama/ollama
 ```
-7. Run the image and the container.
+4. Run the image and the container.
 ```
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
-9. Run the models.
+5. Run the models.
 ```
 docker exec -it ollama ollama run nomic-embed-text
 ```
@@ -55,32 +52,55 @@ NOTE: If the message `Error: embedding models do not support chat` appears when 
 ```
 docker exec -it ollama ollama run llama2
 ```
-11. Run de models.
+6. Run de models.
 ```
 docker run ollama
 ```
-13. Run the tool.
+7. Run the tool.
 ```
 python main.py
 ```
-15. Once the tool is running the user will be asked to ask a question via the command line.
-16. The tool will then return
+
+### Modelfile
+The Modelfile is a configuration file that allows you to customize the behavior of the model.
+If you want to create a Modelfile you can edit the `Modelfile_template.txt` and save it as `Modelfile`.
+
+(First 4 steps are equal to the previous ones.)
+
+Run the Ollama container
+5. Create the directory where the Modelfile will be stored.
+```
+docker exec ollama mkdir -p /files
+```
+6. Copy the Modelfile to the container.
+```
+docker cp ./Modelfile ollama:/files/Modelfile
+```
+7. Create the model using the modelfile.
+```
+docker exec -it ollama ollama create <modelname> -f /files/Modelfile
+```
+8. List the models to verify that the model was created.
+```
+docker exec -it ollama  ollama list
+```
+9. Run the model.
+```
+ollama run <modelname>
+```
+9. Run the tool.
+```
+python main.py
+```
+## Output
+Once the tool is running the user will be asked to make a question via terminal.
+
+The tool will then return:
     - `logfile.log` (A log file with the files processing information).
     - `chunks_<chunk number>.txt` (Text chunks will be satored in `chunks/`).
     - `embedding_<embedding number>.json` (Embeddings will be satored in `embeddings/`)
-17. The model will return the most similar text to the question asked via the command line.
 
-### Modelfile (Created - Not yet implemented)
-The Modelfile is a configuration file that allows you to customize the behavior of the model.
-If you want to create a Modelfile you can edit the Modelfile_template and saveit as Modelfile.
-
-To create a model with a Modelfile you can use the following command:
-```
-ollama create choose-a-model-name -f ./Modelfile'
-```
-```
-ollama run llama2
-```
+The model answers via the terminal.
 
 ## Vector Database (VectorStore)
  This tool uses `chromadb`.
@@ -91,7 +111,6 @@ Pull the base image installation as a container for the vector database.
 ```
 docker pull chromadb/chroma
 ```
-
 ## Resources:
 Ollama
 - [Ollama Llama2 model](https://ollama.com/library/llama2)

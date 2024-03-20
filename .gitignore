@@ -175,7 +175,7 @@ keys/
 *chunk*.txt
 *embedding*.json
 *.html
-*Modelfile*.txt
+Modelfile
 *TODO*
 
 # Security and certificate files

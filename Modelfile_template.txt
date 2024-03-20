@@ -1,0 +1,12 @@
+# From https://github.com/ollama/ollama/blob/main/docs/modelfile.md
+# Ollama Model File for <modelname> Assistant
+# This Modelfile configures <modelname> to act as <desired behaviour> with specific behaviors.
+
+FROM <modelname>
+# Set the model's temperature. Higher values generate more creative responses.
+PARAMETER temperature x.x
+# Set the context window size. Determines how much context the model can consider for its responses.
+PARAMETER num_ctx xxxx
+
+# Custom system message to guide the model's behavior.
+SYSTEM "<context>"
