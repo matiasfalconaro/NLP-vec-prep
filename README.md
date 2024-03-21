@@ -5,6 +5,8 @@ The goal is to create a tool that can be used to create an AI-model trainning da
 
 The tool is going to be used to extract text from a PDF file, create chunks of text, generate embeddings, and save the embeddings to a vector database. The tool will also be able to perform a semantic search.
 
+![Architecture](assets/architecture.drawio.svg)
+
 ## Collaborators
 1. Assign yourself an issue
 2. Create a branch from `main`, named `<issueNr_branch_name>`
@@ -22,7 +24,7 @@ This tool works with 2 instances of the Ollama model locally:
 
 **NOTE: Further tests are needed to determine the best model for the task.**
 
-## Copilot model choice
+### Copilot model choice
 Table of models and their features
 | Model Name       | Coding | Embedded | State-of-the-art | Open training datasets | LLM | Natural language | SQL | General use | Code completion | Multimodal | Large context window | Instructions | Conversational | Merged models |
 |------------------|--------|----------|------------------|------------------------|-----|------------------|-----|-------------|-----------------|------------|----------------------|--------------|----------------|---------------|
