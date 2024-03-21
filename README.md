@@ -74,69 +74,16 @@ Edit the `config_template.json` and save it as `config.json`.
     - Base URL: Specifies the base URL for accessing a retrieval model running in the `ollama` container.
     - Model: Specifies the specific retrieval model to be used.
 
-### Linux
+### Linux installation
 For linux the tool can be run using the `init.sh` script. 
 
 The script will automate most of the steps to run the tool and will guide the user through the process. 
 
-Run the script with the following command:
+Run the script from the project directory with the following command:
 ```
 chmod +x init.sh && ./init.sh
 ```
 
-### Installation
-1. Create the `documents` directory in `NLP-vec-prep/` and place the PDF file to be processed in the documents folder.
-2. Dependencies.
-```
-pip install -r requirements.txt
-```
-3. Pull the base image installation wich is a container for the models.
-```
-docker pull ollama/ollama
-```
-4. Run the image and the container.
-```
-docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
-```
-5. (optional) Run the models and interact directly via terminal to verify that the conversational/chat model selected is working correctly.  
-```
-docker exec -it ollama ollama run <conversational/chat model name>
-```
-6. Run the tool.
-```
-python main.py
-```
-
-### Modelfile
-The Modelfile is a configuration file that allows you to customize the behavior of the model.
-If you want to create a Modelfile you can edit the `Modelfile_template.txt` and save it as `Modelfile`.
-
-(First 4 steps are equal to the previous ones.)
-
-5. Create the directory where the Modelfile will be stored.
-```
-docker exec ollama mkdir -p /files
-```
-6. Copy the Modelfile to the container.
-```
-docker cp ./Modelfile ollama:/files/Modelfile
-```
-7. Create the model using the modelfile.
-```
-docker exec -it ollama ollama create <modelname> -f /files/Modelfile
-```
-8. List the models to verify that the model was created.
-```
-docker exec -it ollama ollama list
-```
-9. (optional) Run the models and interact directly via terminal to verify that the conversational/chat model selected is working correctly.  
-```
-docker exec -it ollama ollama run <modelname>
-```
-10. Run the tool.
-```
-python main.py
-```
 ## Output
 Once the tool is running the user will be asked to make a question and the tool will return the answer via terminal.
 
