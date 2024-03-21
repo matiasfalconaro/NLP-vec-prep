@@ -32,6 +32,21 @@ Table of models and their features
 
 ## Usage
 
+> [!CAUTION]
+> Computational resources and storage space should be considered when using this tool.
+>
+> Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
+
+> [!WARNING]
+> The tool is computationally intensive, so users should expect potentially long processing times depending on PDF size and local machine resources.
+>
+> Since the tool runs in a temporary directory, logging and monitoring can be enabled to track the process, but users should be aware that log files may become large.
+>
+> Sub-process products, like chunked data and embeddings, can be stored in permanent directories to avoid data loss, but users should be aware that these directories may also become large.
+
+> [!IMPORTANT]
+> Docker is required to run the Ollama models. The tool will not work without the Ollama image container running.
+
 ### Configuration
 Edit the `config_template.json` and save it as `config.json`.
 
@@ -56,11 +71,6 @@ Edit the `config_template.json` and save it as `config.json`.
 - Retrieval Model:
     - Base URL: Specifies the base URL for accessing a retrieval model running in the `ollama` container.
     - Model: Specifies the specific retrieval model to be used.
-
-**Considerations:**
-The tool is computationally intensive, so users should expect potentially long processing times depending on PDF size and local machine resources.
-Since the tool runs in a temporary directory, logging and monitoring can be enabled to track the process, but users should be aware that log files may become large.
-Sub-process products, like chunked data and embeddings, can be stored in permanent directories to avoid data loss, but users should be aware that these directories may also become large.
 
 ### Installation
 1. Create the `documents` directory in `NLP-vec-prep/` and place the PDF file to be processed in the documents folder.
