@@ -20,6 +20,3 @@ TEMPLATE """[INST] <<SYS>>{{ .System }}<</SYS>>
 LICENSE """
 <licence description>
 """
-
-MESSAGE user "<prompt>"
-MESSAGE assistant "<completion>"
