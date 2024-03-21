@@ -16,7 +16,7 @@ def create_embeddings(all_splits: List[str],
                       temp_dir: str,
                       embed_dir: str,
                       oembed: OllamaEmbeddings,
-                      logger: logging.Logger):
+                      logger: logging.Logger) -> None:
     """
     Create embeddings for the document chunks
     and store them in the embeddings directory.
@@ -67,7 +67,13 @@ def vector_database_storage(all_splits: List[str],
     return vectorstore
 
 
-def retrieve_answer(vectorstore, question, config, logger):
+def retrieve_answer(vectorstore: Chroma,
+                    question: str,
+                    config: dict,
+                    logger : logging.Logger) -> dict:
+    """
+    Retrieve the answer to the user's question.
+    """
     retrieval_config = config["retrieval_model"]
     ollama = Ollama(base_url=retrieval_config["base_url"],
                     model=retrieval_config["model"])
