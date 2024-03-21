@@ -5,7 +5,7 @@ The goal is to create a tool that can be used to create an AI-model trainning da
 
 The tool is going to be used to extract text from a PDF file, create chunks of text, generate embeddings, and save the embeddings to a vector database. The tool will also be able to perform a semantic search.
 
-![Architecture](assets/architecture.drawio.svg)
+![Architecture](assets/Architecture.drawio.svg)
 
 ## Collaborators
 1. Assign yourself an issue
