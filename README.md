@@ -6,8 +6,6 @@ The goal is to create a tool that can be used to:
 - Perform semantic research.
 - Test AI models using embeddings context.
 
-![Architecture](assets/Architecture.drawio.svg)
-
 ## Collaborators
 1. Assign yourself an issue
 2. Create a branch from `main`, named `<issueNr_branch_name>`
@@ -74,37 +72,3 @@ Once the tool is running the user will be asked to make a question and the tool 
  This tool uses `chromadb`.
  
  Chroma is an AI-native open-source embedding database.
-
-## Resources:
-Ollama
-- [Ollama Llama2 model](https://ollama.com/library/llama2)
-- [Ollama Nomic-Embed-Text model](https://ollama.com/library/nomic-embed-text)
-- [Ollama Docker Image](https://ollama.com/blog/ollama-is-now-available-as-an-official-docker-image)
-- [Ollama GitHub](https://github.com/ollama/ollama)
-- [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md)
-- [Ollama Model File](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)
-
-Langchain
-- [Langchain GitHub](https://github.com/langchain-ai/langchain)
-- [Langchainpy Tutorial](https://github.com/ollama/ollama/blob/main/docs/tutorials/langchainpy.md)
-- [Langchain Ollama](https://python.langchain.com/docs/integrations/llms/ollama)
-- [Langchain Chains](https://python.langchain.com/docs/modules/chains)
-- [Langchain Chroma](https://python.langchain.com/docs/integrations/vectorstores/chroma)
-- [Langchain Filesystem](https://python.langchain.com/docs/integrations/tools/filesystem)
-- [Langchain RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html#langchain.chains.retrieval_qa.base.RetrievalQA)
-- [Embeddings Theory](https://jalammar.github.io/illustrated-word2vec)
-
-Chroma
-- [Chroma GitHub](https://github.com/chroma-core/chroma)
-- [Chroma Documentation](https://docs.trychroma.com/)
-- [Chroma Client](https://docs.trychroma.com/reference/Client)
-- [Chroma Collection](https://docs.trychroma.com/reference/Collection)
-
-PyMuPDF
-- [PyMuPDF GitHub](https://github.com/pymupdf/PyMuPDF)
-
-WatchDog (optional, for file system monitoring)
-- [WatchDog GitHub](https://github.com/gorakhargosh/watchdog)
-
-PythonDotEnv
-- [PythonDotEnv GitHub](https://github.com/theskumar/python-dotenv)
