@@ -4,12 +4,12 @@ from halo import Halo
 from langchain_community.embeddings import OllamaEmbeddings
 from tempfile import TemporaryDirectory
 
-from process.utils import (load_config, setup_logging,
+from utils import (load_config, setup_logging,
                            start_monitoring,
                            FakeContextManager)
-from process.pre_proc import (extract_text,
+from pre_proc import (extract_text,
                               process_text)
-from process.post_proc import (create_embeddings,
+from post_proc import (create_embeddings,
                                vector_database_storage,
                                retrieve_answer)
 

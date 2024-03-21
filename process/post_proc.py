@@ -4,7 +4,7 @@ import logging
 
 from typing import List
 
-from process.utils import MockDocument
+from utils import MockDocument
 
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma

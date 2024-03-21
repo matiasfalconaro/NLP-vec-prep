@@ -4,7 +4,7 @@ import os
 
 from typing import List
 
-from process.utils import MockDocument
+from utils import MockDocument
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
