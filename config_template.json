@@ -1,0 +1,27 @@
+{
+  "pdf_path": " /path/to/pdf",
+  "logging": {
+      "enabled": false,
+      "log_file": "LogFile.log",
+      "level": "INFO",
+      "format": "%(asctime)s - %(levelname)s - %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+  },
+  "directories": {
+    "chunk_dir": "chunks",
+    "embed_dir": "embeddings",
+    "use_temp_dir": true,
+    "temp_dir": "/path/to/custom/temp/dir"
+  },
+  "ollama_embeddings": {
+    "base_url": "http://localhost:11434",
+    "model": "nomic-embed-text"
+  },
+  "monitoring": {
+    "enabled": false
+  },
+  "retrieval_model": {
+    "base_url": "http://localhost:11434",
+    "model": "model_name"
+  }
+}
