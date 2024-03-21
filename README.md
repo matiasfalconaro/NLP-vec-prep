@@ -1,9 +1,10 @@
 # NPL-vec-prep
 
 ## Description
-The goal is to create a tool that can be used to create an AI-model trainning dataset. 
-
-The tool is going to be used to extract text from a PDF file, create chunks of text, generate embeddings, and save the embeddings to a vector database. The tool will also be able to perform a semantic search.
+The goal is to create a tool that can be used to:
+- Create an AI-model trainning dataset. 
+- Perform semantic research.
+- Test AI models using embeddings context.
 
 ![Architecture](assets/Architecture.drawio.svg)
 
@@ -17,34 +18,16 @@ The tool is going to be used to extract text from a PDF file, create chunks of t
 IMPORTANT: the only commits to the main branch should be changes to the README
 
 ## Models
-This tool works with 2 instances of the Ollama model locally:
+This tool use 2 instances of the Ollama model:
 
 - `llama2` / `falcon` (or other conversational model)
-- `gnomic-embed-text` (or other open embedding model)
-
-**NOTE: Further tests are needed to determine the best model for the task.**
-
-### Copilot model choice
-Table of models and their features
-| Model Name       | Coding | Embedded | State-of-the-art | Open training datasets | LLM | Natural language | SQL | General use | Code completion | Multimodal | Large context window | Instructions | Conversational | Merged models |
-|------------------|--------|----------|------------------|------------------------|-----|------------------|-----|-------------|-----------------|------------|----------------------|--------------|----------------|---------------|
-| llama2           | x      |          | x                |                        | x   | x                |     | x           |                 |            |                      |              | x              |               |
-| falcon           | x      |          | x                |                        | x   | x                |     | x           |                 |            | x                    | x            | x              |               |
-| gnomic-embed-text|        | x        | x                | x                      |     |                  |     |             |                 |            | x                    |              |                |               |
+- `gnomic-embed-text` (or other embedding model)
 
 ## Usage
 
 > [!CAUTION]
-> Computational resources and storage space should be considered when using this tool.
->
-> Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
-
-> [!WARNING]
-> The tool is computationally intensive, so users should expect potentially long processing times depending on PDF size and local machine resources.
->
-> Since the tool runs in a temporary directory, logging and monitoring can be enabled to track the process, but users should be aware that log files may become large.
->
-> Sub-process products, like chunked data and embeddings, can be stored in permanent directories to avoid data loss, but users should be aware that these directories may also become large.
+> - Computational resources and storage space should be considered when using this tool.
+> - Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
 
 > [!NOTE]
 > Python 3.9.5
