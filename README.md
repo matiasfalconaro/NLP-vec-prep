@@ -47,6 +47,9 @@ Table of models and their features
 > [!IMPORTANT]
 > Docker is required to run the Ollama models. The tool will not work without the Ollama image container running.
 
+> [!NOTE]
+> Python 3.9.5
+
 ### Configuration
 Edit the `config_template.json` and save it as `config.json`.
 
