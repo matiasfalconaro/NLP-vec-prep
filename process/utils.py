@@ -7,6 +7,7 @@ from typing import Any
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
+
 class FakeContextManager:
     """
     A fake context manager to handle the temporary directory.
@@ -17,9 +18,9 @@ class FakeContextManager:
     def __enter__(self):
         return self.path
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Implement cleanup logic if necessary
+    def __exit__(self):
         pass
+
 
 class MockDocument:
     """
@@ -28,6 +29,7 @@ class MockDocument:
     def __init__(self, text, metadata=None):
         self.page_content = text
         self.metadata = metadata if metadata is not None else {}
+
 
 def load_config() -> Any:
     """
@@ -39,8 +41,9 @@ def load_config() -> Any:
     except FileNotFoundError:
         logging.error("Config file not found. Using default configuration.")
     except json.JSONDecodeError:
-        logging.error("Config file is not valid JSON. Using default configuration.")
+        logging.error("Config file is not valid. Using default configuration.")
     return {}
+
 
 def setup_logging() -> Any:
     """
@@ -56,9 +59,10 @@ def setup_logging() -> Any:
     try:
         logging.basicConfig(
             filename=logging_config.get("log_file", "default.log"),
-            level=getattr(logging, logging_config.get("level", "INFO").upper()),
-            format=logging_config.get("format",
-                                      "%(asctime)s - %(levelname)s - %(message)s"),
+            level=getattr(logging,
+                          logging_config.get("level", "INFO").upper()),
+            format=logging_config.get(
+                "format", "%(asctime)s - %(levelname)s - %(message)s"),
             datefmt=logging_config.get("datefmt", "%Y-%m-%d %H:%M:%S")
         )
     except Exception as e:
@@ -67,6 +71,7 @@ def setup_logging() -> Any:
         return logging.getLogger(__name__)
 
     return logging.getLogger(__name__)
+
 
 def start_monitoring(path: str) -> Any:
     """

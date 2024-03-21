@@ -4,14 +4,16 @@ from halo import Halo
 from langchain_community.embeddings import OllamaEmbeddings
 from tempfile import TemporaryDirectory
 
-from utils import (load_config, setup_logging,
-                           start_monitoring,
-                           FakeContextManager)
+from utils import (load_config,
+                   setup_logging,
+                   start_monitoring,
+                   FakeContextManager)
 from pre_proc import (extract_text,
-                              process_text)
+                      process_text)
 from post_proc import (create_embeddings,
-                               vector_database_storage,
-                               retrieve_answer)
+                       vector_database_storage,
+                       retrieve_answer)
+
 
 def main():
     """
@@ -24,12 +26,14 @@ def main():
     try:
         logger = setup_logging()
         config = load_config()
-        
+
         pdf_path = config.get("pdf_path")
         if not pdf_path or not os.path.exists(pdf_path):
-            logger.error(f"PDF path is incorrect or file does not exist: {pdf_path}")
+            logger.error(
+                f"PDF path is incorrect or file does not exist: {pdf_path}"
+            )
             return
-        
+
         text = extract_text(pdf_path, logger)
 
         temp_dir_context_manager = (
@@ -48,7 +52,7 @@ def main():
                 if observer is not None:
                     logger.info("Monitoring temporary directory.")
                 else:
-                    logger.error("Failed to start monitoring. Check the logs for details.")
+                    logger.error("Failed to start monitoring.")
 
             oembed_config = config["ollama_embeddings"]
             oembed = OllamaEmbeddings(base_url=oembed_config["base_url"],
@@ -66,7 +70,8 @@ def main():
             spinner.text = 'Retrieving answer...'
             answer = retrieve_answer(vectorstore, question, config, logger)
             spinner.stop()
-            print(f"Answer: {answer['result']}" if 'result' in answer else "No answer found.")
+            print(f"Answer: {answer['result']}" if 'result' in answer
+                  else "No answer found.")
 
             if observer and config["monitoring"]["enabled"]:
                 observer.stop()
@@ -82,6 +87,7 @@ def main():
             observer.join()
         spinner.stop()
         logger.info("Process completed.")
+
 
 if __name__ == "__main__":
     main()

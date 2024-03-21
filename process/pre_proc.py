@@ -8,6 +8,7 @@ from utils import MockDocument
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+
 def extract_text(pdf_path: str, logger: logging.Logger) -> str:
     """
     Extract text from the PDF file.
@@ -23,13 +24,18 @@ def extract_text(pdf_path: str, logger: logging.Logger) -> str:
         raise
     return text
 
-def process_text(text: str, temp_dir: str, chunk_dir: str, logger: logging.Logger) -> List[str]:
+
+def process_text(text: str,
+                 temp_dir: str,
+                 chunk_dir: str,
+                 logger: logging.Logger) -> List[str]:
     """
     Process the text into chunks and store them in the temporary directory.
     """
     saved_chunk_paths = []
     try:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,
+                                                       chunk_overlap=20)
         mock_docs = [MockDocument(text)]
         splits = text_splitter.split_documents(mock_docs)
 
