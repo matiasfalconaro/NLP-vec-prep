@@ -11,7 +11,6 @@ from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain_community.llms import Ollama
 
-
 def create_embeddings(all_splits: List[str],
                       temp_dir: str,
                       embed_dir: str,
@@ -33,17 +32,16 @@ def create_embeddings(all_splits: List[str],
     try:
         embeddings = oembed.embed_documents(texts)
         for i, embedding in enumerate(embeddings, start=1):
-            temp_embedding_file_path = os.path.join(temp_dir,
-                                                    f"embedding_{i}.json")
-            permanent_embedding_file_path = os.path.join(embed_dir,
-                                                         f"embedding_{i}.json")
-            for path in [temp_embedding_file_path,
-                         permanent_embedding_file_path]:
-                with open(path, 'w') as f:
-                    json.dump(embedding, f)
+            try:
+                temp_embedding_file_path = os.path.join(temp_dir, f"embedding_{i}.json")
+                permanent_embedding_file_path = os.path.join(embed_dir, f"embedding_{i}.json")
+                for path in [temp_embedding_file_path, permanent_embedding_file_path]:
+                    with open(path, 'w') as f:
+                        json.dump(embedding, f)
+            except IOError as e:
+                logger.error(f"Failed to save embedding to {path}: {e}")
     except Exception as e:
         logger.error(f"Failed to create embeddings: {e}")
-
 
 def vector_database_storage(all_splits: List[str],
                             oembed: OllamaEmbeddings,
@@ -61,29 +59,35 @@ def vector_database_storage(all_splits: List[str],
             logger.error(f"Error reading file for vector database: {e}")
             continue
 
-    vectorstore = Chroma.from_documents(documents=document_objects,
-                                        embedding=oembed)
+    try:
+        vectorstore = Chroma.from_documents(documents=document_objects, embedding=oembed)
+    except Exception as e:
+        logger.error(f"Failed to create vector database: {e}")
+        # Depending on your error handling policy, you might want to return None or raise
+        raise
     logger.info("Completed storing embeddings in vector database.")
     return vectorstore
-
 
 def retrieve_answer(vectorstore: Chroma,
                     question: str,
                     config: dict,
-                    logger : logging.Logger) -> dict:
+                    logger: logging.Logger) -> dict:
     """
     Retrieve the answer to the user's question.
     """
-    retrieval_config = config["retrieval_model"]
-    ollama = Ollama(base_url=retrieval_config["base_url"],
-                    model=retrieval_config["model"])
-    logger.info(f"Using model: {ollama.model} at {ollama.base_url}")
-    qachain = RetrievalQA.from_chain_type(ollama,
-                                          retriever=vectorstore.as_retriever())
-    answer = qachain.invoke({"query": question})
-    if 'result' in answer:
-        logger.info(f"User query:\n{answer['query']}")
-        logger.info(f"Retrieved answer:\n{answer['result']}")
-    else:
-        logger.error("No 'result' found in the response.")
+    try:
+        retrieval_config = config["retrieval_model"]
+        ollama = Ollama(base_url=retrieval_config["base_url"], model=retrieval_config["model"])
+        logger.info(f"Using model: {ollama.model} at {ollama.base_url}")
+        qachain = RetrievalQA.from_chain_type(ollama, retriever=vectorstore.as_retriever())
+        answer = qachain.invoke({"query": question})
+        if 'result' in answer:
+            logger.info(f"User query:\n{answer['query']}")
+            logger.info(f"Retrieved answer:\n{answer['result']}")
+        else:
+            logger.error("No 'result' found in the response.")
+    except Exception as e:
+        logger.error(f"Failed to retrieve answer: {e}")
+        # Depending on how critical this failure is, you might want to return an empty dict or raise
+        return {}
     return answer
