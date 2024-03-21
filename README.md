@@ -46,9 +46,6 @@ Table of models and their features
 >
 > Sub-process products, like chunked data and embeddings, can be stored in permanent directories to avoid data loss, but users should be aware that these directories may also become large.
 
-> [!IMPORTANT]
-> Docker is required to run the Ollama models. The tool will not work without the Ollama image container running.
-
 > [!NOTE]
 > Python 3.9.5
 
@@ -76,6 +73,16 @@ Edit the `config_template.json` and save it as `config.json`.
 - Retrieval Model:
     - Base URL: Specifies the base URL for accessing a retrieval model running in the `ollama` container.
     - Model: Specifies the specific retrieval model to be used.
+
+### Linux
+For linux the tool can be run using the `init.sh` script. 
+
+The script will automate most of the steps to run the tool and will guide the user through the process. 
+
+Run the script with the following command:
+```
+chmod +x init.sh && ./init.sh
+```
 
 ### Installation
 1. Create the `documents` directory in `NLP-vec-prep/` and place the PDF file to be processed in the documents folder.
@@ -120,7 +127,7 @@ docker exec -it ollama ollama create <modelname> -f /files/Modelfile
 ```
 8. List the models to verify that the model was created.
 ```
-docker exec -it ollama  ollama list
+docker exec -it ollama ollama list
 ```
 9. (optional) Run the models and interact directly via terminal to verify that the conversational/chat model selected is working correctly.  
 ```
