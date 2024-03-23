@@ -25,10 +25,21 @@ This tool use 2 instances of the Ollama model:
 
 > [!CAUTION]
 > - Computational resources and storage space should be considered when using this tool.
+> - All files processing is made in-memory and in temporary directories.
 > - Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
 
-> [!NOTE]
-> Python 3.9.5
+### Virtual environment
+> [!WARNING]
+> Since anaconda seems to be causing issues with the installation of some packages, we recommend using a virtual environment.
+> ```
+> python3 -m venv nlp-vec-prep
+> ```
+> ```
+> source nlp-vec-prep/bin/activate
+> ```
+> ```
+> pip install -r requirements.txt
+> ```
 
 ### Configuration
 Edit the `config_template.json` and save it as `config.json`.
@@ -72,3 +83,4 @@ Once the tool is running the user will be asked to make a question and the tool 
  This tool uses `chromadb`.
  
  Chroma is an AI-native open-source embedding database.
+ In this project, we use Chroma as an in-memory database to store and retrieve embeddings.
