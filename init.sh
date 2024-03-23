@@ -46,4 +46,4 @@ else
 fi
 
 echo "Start"
-python process/main.py
+python3 process/main.py

@@ -80,7 +80,7 @@ def main():
             logger.info("Temporary directory and files handled.")
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        spinner.fail("Process failed. Check logs for details.")
+        spinner.fail("Process failed. Check LogFile for details.")
     finally:
         if observer and observer.is_alive():
             observer.stop()
