@@ -24,9 +24,9 @@ This tool use 2 instances of the Ollama model:
 ## Usage
 
 > [!CAUTION]
-> - Computational resources and storage space should be considered when using this tool.
-> - All files processing is made in-memory and in temporary directories.
-> - Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
+- Computational resources and storage space should be considered when using this tool.
+- All files processing is made in-memory and in temporary directories.
+- Refer to the [Ollama documentation](https://ollama.com/library) for information on the available models and their requirements.
 
 ### Virtual environment
 > [!WARNING]
