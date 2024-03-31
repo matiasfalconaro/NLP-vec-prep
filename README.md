@@ -30,22 +30,42 @@ This tool use 2 instances of the Ollama model:
 
 ### Virtual environment
 > [!WARNING]
-> Since anaconda seems to be causing issues with the installation of some packages, we recommend using a virtual environment.
-> ```
-> python3 -m venv nlp-vec-prep
-> ```
-> ```
-> source nlp-vec-prep/bin/activate
-> ```
-> ```
-> pip install -r requirements.txt
-> ```
+1. Python 3.9 virtual environment is recommended.
+Since anaconda seems to be causing issues with the installation of some packages, we recommend using a virtual environment.
+```
+python3 -m venv nlp-venv
+```
+```
+source nlp-venv/bin/activate
+```
+```
+pip install -r requirements.txt
+```
+
+> [!NOTE]
+If the following error occurs: 
+
+```
+An error occurred: Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0. Please visit https://docs.trychroma.com/troubleshooting#sqlite to learn how to upgrade.
+```
+It is ncessary to install the `pysqlite3` package in the virtual environment.
+And then edit the `__init__.py` file in the `chromadb` package inside the virtual environment.
+```
+~/NLP-vec-prep/nlp-venv/lib/python3.9/site-packages/chromadb/__init__.py
+```
+These 3 lines should be added at the beginning of the file:
+```
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+```
+These three lines swap the stdlib sqlite3 lib with the pysqlite3 package
 
 ### Configuration
 Edit the `config_template.json` and save it as `config.json`.
 
-- PDF Path:
-    - Specifies the path to the PDF file to be processed.
+- Data path:
+    - Specifies the path to the `documents/` directory
 - Logging:
     - Enabled: Indicates whether logging is enabled or not. If enabled, logs will be generated.
     - Log File: Specifies the name of the log file.
