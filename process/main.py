@@ -48,7 +48,7 @@ def main():
                     pdf_path = os.path.join(data_path, filename)
                     logger.info(f"Processing PDF: {pdf_path}")
                     text = extract_text(pdf_path, logger)
-                    processed_paths = process_text(text, temp_dir, chunk_dir, logger)
+                    processed_paths = process_text(text, temp_dir, chunk_dir, filename, logger)
                     all_splits.extend(processed_paths)
 
             if all_splits:
