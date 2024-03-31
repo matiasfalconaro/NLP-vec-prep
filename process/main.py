@@ -1,24 +1,14 @@
 import os
 
 from halo import Halo
-from langchain_community.embeddings import OllamaEmbeddings
 from tempfile import TemporaryDirectory
 
-from utils import (load_config,
-                   setup_logging,
-                   start_monitoring,
-                   FakeContextManager)
-from pre_proc import (extract_text,
-                      process_text)
-from post_proc import (create_embeddings,
-                       vector_database_storage,
-                       retrieve_answer)
-
+from utils import (load_config, setup_logging, start_monitoring, FakeContextManager)
+from pre_proc import extract_text, process_text
+from post_proc import create_embeddings, vector_database_storage, retrieve_answer
+from langchain_community.embeddings import OllamaEmbeddings
 
 def main():
-    """
-    Main function to run the process.
-    """
     spinner = Halo(text='Initializing...', spinner='dots')
     spinner.start()
     observer = None
@@ -27,14 +17,11 @@ def main():
         logger = setup_logging()
         config = load_config()
 
-        pdf_path = config.get("pdf_path")
-        if not pdf_path or not os.path.exists(pdf_path):
-            logger.error(
-                f"PDF path is incorrect or file does not exist: {pdf_path}"
-            )
+        data_path = config.get("data_path")
+        if not data_path or not os.path.exists(data_path):
+            logger.error(f"Data path is incorrect or does not exist: {data_path}")
+            spinner.fail("Initialization failed. Check configuration.")
             return
-
-        text = extract_text(pdf_path, logger)
 
         temp_dir_context_manager = (
             TemporaryDirectory() if config["directories"]["use_temp_dir"]
@@ -49,35 +36,43 @@ def main():
 
             if config["monitoring"]["enabled"]:
                 observer = start_monitoring(temp_dir)
-                if observer is not None:
-                    logger.info("Monitoring temporary directory.")
-                else:
+                if not observer:
                     logger.error("Failed to start monitoring.")
 
             oembed_config = config["ollama_embeddings"]
-            oembed = OllamaEmbeddings(base_url=oembed_config["base_url"],
-                                      model=oembed_config["model"])
+            oembed = OllamaEmbeddings(base_url=oembed_config["base_url"], model=oembed_config["model"])
 
-            spinner.text = 'Processing text...'
-            all_splits = process_text(text, temp_dir, chunk_dir, logger)
-            create_embeddings(all_splits, temp_dir, embed_dir, oembed, logger)
-            vectorstore = vector_database_storage(all_splits, oembed, logger)
+            all_splits = []
+            for filename in os.listdir(data_path):
+                if filename.lower().endswith('.pdf'):
+                    pdf_path = os.path.join(data_path, filename)
+                    logger.info(f"Processing PDF: {pdf_path}")
+                    text = extract_text(pdf_path, logger)
+                    processed_paths = process_text(text, temp_dir, chunk_dir, logger)
+                    all_splits.extend(processed_paths)
 
-            spinner.stop()
-            question = input("Enter your question: ")
-            spinner.start()
+            if all_splits:
+                spinner.text = 'Creating embeddings...'
+                create_embeddings(all_splits, temp_dir, embed_dir, oembed, logger)
+                spinner.text = 'Storing embeddings in vector database...'
+                vectorstore = vector_database_storage(all_splits, oembed, logger)
 
-            spinner.text = 'Retrieving answer...'
-            answer = retrieve_answer(vectorstore, question, config, logger)
-            spinner.stop()
-            print(f"Answer: {answer['result']}" if 'result' in answer
-                  else "No answer found.")
+                spinner.stop()
+                question = input("Enter your question: ")
+                spinner.start()
+
+                spinner.text = 'Retrieving answer...'
+                answer = retrieve_answer(vectorstore, question, config, logger)
+                spinner.stop()
+                print(f"Answer: {answer['result']}" if 'result' in answer else "No answer found.")
+            else:
+                logger.error("No documents were processed.")
+                spinner.fail("No documents processed.")
 
             if observer and config["monitoring"]["enabled"]:
                 observer.stop()
                 observer.join()
                 logger.info("Monitoring stopped for temporary directory.")
-            logger.info("Temporary directory and files handled.")
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         spinner.fail("Process failed. Check LogFile for details.")
@@ -87,7 +82,6 @@ def main():
             observer.join()
         spinner.stop()
         logger.info("Process completed.")
-
 
 if __name__ == "__main__":
     main()
