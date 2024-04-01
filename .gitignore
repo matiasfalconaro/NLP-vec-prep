@@ -167,6 +167,7 @@ config.json
 *credentials*     # Ignore all files and directories containing 'credentials'
 credentials/
 keys/
+chroma/chroma
 
 # Common document formats that may contain sensitive information
 *.pdf

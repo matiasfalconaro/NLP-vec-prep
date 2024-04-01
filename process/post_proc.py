@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import traceback
 
 from typing import List
 
@@ -65,10 +66,13 @@ def vector_database_storage(all_splits: List[str],
             continue
 
     try:
+        persist_directory = 'chroma/chroma'
         vectorstore = Chroma.from_documents(documents=document_objects,
-                                            embedding=oembed)
+                                            embedding=oembed,
+                                            persist_directory=persist_directory)
+        vectorstore.persist()
     except Exception as e:
-        logger.error(f"Failed to create vector database: {e}")
+        logger.error(f"Failed to create vector database: {e}\n{traceback.format_exc()}")
         raise
     logger.info("Completed storing embeddings in vector database.")
     return vectorstore
