@@ -102,7 +102,16 @@ chmod +x init.sh && ./init.sh
 Once the tool is running the user will be asked to make a question and the tool will return the answer via terminal.
 
 ## Vector Database (VectorStore)
- This tool uses `chromadb`.
- 
+ This tool uses Chroma vector datbase.
+
  Chroma is an AI-native open-source embedding database.
- In this project, we use Chroma as an in-memory database to store and retrieve embeddings.
+
+ After the first run, pull the docker image.
+ ```
+ docker pull chromadb/chroma:latest
+ ```
+ then run the docker image mapping the locally created `chroma/chroma` directory to the `chromadb/chroma` container directory.
+ ```
+ docker run -d -p 8000:8000 -v /absolute/path/to/NLP-vec-prep/chroma/chroma/:/chroma/chroma chromadb:chroma
+ ```
+ 
