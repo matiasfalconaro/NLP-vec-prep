@@ -3,6 +3,7 @@ import os
 from halo import Halo
 from tempfile import TemporaryDirectory
 
+from database import ChromaHTTPClient
 from utils import (load_config, setup_logging, start_monitoring, FakeContextManager)
 from pre_proc import extract_text, process_text
 from post_proc import create_embeddings, vector_database_storage, retrieve_answer
@@ -43,6 +44,8 @@ def main():
             oembed = OllamaEmbeddings(base_url=oembed_config["base_url"], model=oembed_config["model"])
 
             all_splits = []
+            chroma_client = ChromaHTTPClient(base_url=config["chroma"]["base_url"])
+            collection_name = config["chroma"]["collection_name"]
             for filename in os.listdir(data_path):
                 if filename.lower().endswith('.pdf'):
                     pdf_path = os.path.join(data_path, filename)
@@ -55,7 +58,7 @@ def main():
                 spinner.text = 'Creating embeddings...'
                 create_embeddings(all_splits, temp_dir, embed_dir, oembed, logger)
                 spinner.text = 'Storing embeddings in vector database...'
-                vectorstore = vector_database_storage(all_splits, oembed, logger)
+                vectorstore = vector_database_storage(all_splits, oembed, logger, chroma_client, collection_name)
 
                 spinner.stop()
                 question = input("Enter your question: ")
