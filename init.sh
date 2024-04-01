@@ -8,9 +8,11 @@ fi
 echo "Docker is installed."
 
 mkdir -p documents
+echo "----------------------------------------------------------------------------------------------------"
 echo "Please ensure you have installed the required packages by running 'pip install -r requirements.txt'."
 echo "Please ensure your PDF file is placed in the NLP-vec-prep/documents directory."
 echo "Please ensure you edit the config_template.json file and save it as config.json"
+echo "----------------------------------------------------------------------------------------------------"
 
 container_exists=$(docker ps -a --filter "name=ollama" --format "{{.Names}}")
 
@@ -29,12 +31,12 @@ else
     docker pull ollama/ollama
     docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 fi
-
+echo "----------------------------------------------------------------------------------------------------"
 echo "Do you want to use a Modelfile? (yes/no)"
+echo "If so, please ensure you have placed the Modelfile in the NLP-vec-prep directory."
 read -r use_modelfile
 
 if [[ "$use_modelfile" == "yes" ]]; then
-    echo "Please ensure you edit the Modelfile_template.txt file and save it as Modelfile."
     docker exec ollama mkdir -p /files
     docker cp ./Modelfile ollama:/files/Modelfile
     echo "Enter the model name to create using the Modelfile: "
@@ -44,6 +46,6 @@ if [[ "$use_modelfile" == "yes" ]]; then
 else
     echo "Skipping Modelfile steps."
 fi
-
+echo "----------------------------------------------------------------------------------------------------"
 echo "Start"
 python3 process/main.py

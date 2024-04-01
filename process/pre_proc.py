@@ -28,6 +28,7 @@ def extract_text(pdf_path: str, logger: logging.Logger) -> str:
 def process_text(text: str,
                  temp_dir: str,
                  chunk_dir: str,
+                 pdf_filename: str,
                  logger: logging.Logger) -> List[str]:
     """
     Process the text into chunks and store them in the temporary directory.
@@ -40,7 +41,7 @@ def process_text(text: str,
         splits = text_splitter.split_documents(mock_docs)
 
         for i, chunk in enumerate(splits, start=1):
-            chunk_filename = f"chunk_{i}.txt"
+            chunk_filename = f"{pdf_filename}chunk_{i}.txt"
             temp_path = os.path.join(temp_dir, chunk_filename)
             perm_path = os.path.join(chunk_dir, chunk_filename)
             logger.info(f"Saving chunk {i} to {temp_path} and {perm_path}")
