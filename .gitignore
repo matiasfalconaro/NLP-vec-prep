@@ -161,7 +161,8 @@ cython_debug/
 #.idea/
 
 # CUSTOM
-config.json
+config*.json
+chroma
 
 # Ignore specific sensitive file patterns
 *credentials*     # Ignore all files and directories containing 'credentials'

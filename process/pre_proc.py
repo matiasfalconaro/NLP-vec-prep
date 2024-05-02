@@ -1,61 +1,109 @@
 import fitz  # PyMuPDF
-import logging
+import json
 import os
+import re
 
 from typing import List
 
-from utils import MockDocument
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+def load_config():
+    with open('config.json', 'r') as file:
+        return json.load(file)
 
 
-def extract_text(pdf_path: str, logger: logging.Logger) -> str:
+def extract_text(pdf_path: str, skip_pages: List[int]) -> str:
     """
-    Extract text from the PDF file.
+    Extract text from the PDF file, skipping specified pages.
     """
     text = ""
     try:
         with fitz.open(pdf_path) as doc:
-            for page_num in doc:
-                text += page_num.get_text()
-                logger.info(f"Extracted text from page {page_num.number}")
+            for i, page in enumerate(doc, start=1):
+                if i in skip_pages:
+                    continue
+                page_text = page.get_text()
+                # Remove standalone numbers
+                page_text = re.sub(r'^\s*\d+\s*$',
+                                   '',
+                                   page_text,
+                                   flags=re.MULTILINE)
+                # Reduce multiple newlines to a single one
+                page_text = re.sub(r'\n\s*\n',
+                                   '\n',
+                                   page_text)
+                text += page_text
     except Exception as e:
-        logger.error(f"Failed to extract text from {pdf_path}: {e}")
-        raise
+        print(f"Failed to process {pdf_path}: {str(e)}")
+        return ""
     return text
 
 
-def process_text(text: str,
-                 temp_dir: str,
-                 chunk_dir: str,
-                 pdf_filename: str,
-                 logger: logging.Logger) -> List[str]:
+def split_text(text: str, max_size: int) -> List[str]:
     """
-    Process the text into chunks and store them in the temporary directory.
+    Split the given text into chunks,
+    ending each chunk with an empty line.
     """
-    saved_chunk_paths = []
-    try:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,
-                                                       chunk_overlap=20)
-        mock_docs = [MockDocument(text)]
-        splits = text_splitter.split_documents(mock_docs)
+    chunks = []
+    current_chunk = ""
+    for line in text.split('\n'):
+        # +1 for the newline character
+        if len(current_chunk) + len(line) + 1 > max_size:
+            # Check if the current chunk ends appropriately.
+            # Add newline if it doesn't.
+            if not current_chunk.endswith('\n'):
+                current_chunk += '\n'
+            chunks.append(current_chunk)
+            # Start a new chunk with the current line
+            current_chunk = line + '\n'
+        else:
+            current_chunk += line + '\n'
 
-        for i, chunk in enumerate(splits, start=1):
-            chunk_filename = f"{pdf_filename}chunk_{i}.txt"
-            temp_path = os.path.join(temp_dir, chunk_filename)
-            perm_path = os.path.join(chunk_dir, chunk_filename)
-            logger.info(f"Saving chunk {i} to {temp_path} and {perm_path}")
-            for path in [temp_path, perm_path]:
-                try:
-                    with open(path, 'w') as file:
-                        file.write(chunk.page_content)
-                    if path == temp_path:
-                        saved_chunk_paths.append(temp_path)
-                    logger.info(f"Saved chunk {i} to {path}")
-                except IOError as e:
-                    logger.error(f"Failed to save chunk {i} to {path}: {e}")
-    except Exception as e:
-        logger.error(f"Failed during text processing: {e}")
-        raise
+    if current_chunk:
+        # Ensure the final chunk is properly terminated with a newline
+        if not current_chunk.endswith('\n'):
+            current_chunk += '\n'
+        chunks.append(current_chunk)
+    return chunks
 
-    return saved_chunk_paths
+
+def save_chunks(chunks: List[str],
+                base_directory: str,
+                document_name: str) -> None:
+    """
+    Save each chunk to a separate file
+    in a dedicated directory for the document.
+    """
+    directory = os.path.join(base_directory, document_name)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    for i, chunk in enumerate(chunks):
+        file_path = os.path.join(directory,
+                                 f"{document_name}_chunk_{i+1}.txt")
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(chunk)
+
+
+def process_pdfs(config: dict) -> None:
+    """
+    Process all PDF files based on the configuration settings.
+    """
+    pdf_directory = config.get('documents_directory', 'documents')
+    chunks_directory = config.get('chunks_directory', 'chunks')
+    
+    for pdf_filename in os.listdir(pdf_directory):
+        if pdf_filename.lower().endswith('.pdf'):
+            pdf_path = os.path.join(pdf_directory, pdf_filename)
+            settings = config['documents'].get(pdf_filename, {})
+            skip_pages = settings.get('skip_pages', [])
+            max_chunk_size = settings.get('max_chunk_size', 500)
+            print(f"Processing {pdf_filename}")
+            text = extract_text(pdf_path, skip_pages)
+            chunks = split_text(text, max_chunk_size)
+            save_chunks(chunks,
+                        chunks_directory,
+                        os.path.splitext(pdf_filename)[0])
+
+
+config = load_config()
+process_pdfs(config)
