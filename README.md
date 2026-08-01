@@ -1,4 +1,4 @@
-# NPL-vec-prep
+# Natural Language Procesing embeddings toolkit
 
 ## Description
 The goal is to create a tool that can be used to:
